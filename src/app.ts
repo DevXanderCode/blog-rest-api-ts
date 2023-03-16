@@ -1,1 +1,7 @@
-console.log("Loggingggg....");
+import express from "express";
+
+const app = express();
+
+app.listen(8080, () => {
+  console.log("app listening at port 8080");
+});
