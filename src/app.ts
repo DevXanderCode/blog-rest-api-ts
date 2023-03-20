@@ -1,6 +1,9 @@
 import express, { Express, Request, Response, NextFunction } from "express";
 import bodyParser from "body-parser";
+import mongoose from "mongoose";
 import { feedRoutes } from "./routes";
+
+const MONGODB_URI = "mongodb://localhost:27017/blog";
 
 const app: Express = express();
 
@@ -18,6 +21,15 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use("/feed", feedRoutes);
 
-app.listen(8080, () => {
-  console.log("app listening at port 8080");
-});
+mongoose
+  .connect(MONGODB_URI)
+  .then((result) => {
+    console.log("Database connected");
+
+    app.listen(8080, () => {
+      console.log("app listening at port 8080");
+    });
+  })
+  .catch((err) => {
+    console.log("Database connection failed", err);
+  });
