@@ -10,7 +10,8 @@
     "start:dev": "npx nodemon ./src/app.ts",
     "build": "tsc --incremental",
     "lint": "eslint . --ext .ts",
-    "lint-and-fix": "eslint . --ext .ts --fix"
+    "lint-and-fix": "eslint . --ext .ts --fix",
+    "prepare": "husky install"
   },
   "keywords": [
     "rest",
@@ -22,7 +23,8 @@
     "body-parser": "^1.20.2",
     "express": "^4.18.2",
     "express-validator": "^6.15.0",
-    "mongoose": "^7.0.2"
+    "mongoose": "^7.0.2",
+    "prettier": "^2.8.5"
   },
   "devDependencies": {
     "@types/express": "^4.17.17",
@@ -30,6 +32,8 @@
     "@typescript-eslint/eslint-plugin": "^5.55.0",
     "@typescript-eslint/parser": "^5.55.0",
     "eslint": "^8.36.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^13.2.0",
     "nodemon": "^2.0.21",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5"
