@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import { feedRoutes } from "./routes";
 
-const MONGODB_URI = "mongodb://localhost:27017/blog";
+const MONGODB_URI = "mongodb://localhost:27017/messages";
 
 const app: Express = express();
 
