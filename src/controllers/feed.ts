@@ -61,3 +61,24 @@ export const createPost = (req: Request, res: Response, next: NextFunction) => {
       next(err);
     });
 };
+
+export const getSinglePost = (req: Request, res: Response, next: NextFunction) => {
+  const { postId } = req.params;
+
+  Post.findById(postId)
+    .then((post) => {
+      if (!post) {
+        const error: HttpError = new Error('No Post Found');
+        error.statusCode = 500;
+        throw error;
+      }
+      res.status(200).json({
+        post,
+      });
+    })
+    .catch((err) => {
+      const error: HttpError = new Error(err);
+      error.statusCode = 500;
+      next(error);
+    });
+};

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { body } from 'express-validator';
-import { createPost, getPosts } from '../controllers/feed';
+import { createPost, getPosts, getSinglePost } from '../controllers/feed';
 
 const router = Router();
 
@@ -8,6 +8,8 @@ const router = Router();
 will call the getPosts function. */
 router.get('/posts', getPosts);
 
-router.post('/post', [body('title').isLength({ min: 15 }), body('content').isLength({ min: 5 })], createPost);
+router.get('/post/:postId', getSinglePost);
+
+router.post('/post', [body('title').isLength({ min: 5 }), body('content').isLength({ min: 5 })], createPost);
 
 export default router;
