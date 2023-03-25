@@ -3,7 +3,7 @@ import { validationResult } from 'express-validator';
 import { Post } from '../models';
 import { HttpError } from '../types';
 
-export const getPosts = (_req: Request, res: Response, _next: NextFunction) => {
+export const getPosts = (_req: Request, res: Response, next: NextFunction) => {
   Post.find()
     .then((posts) => {
       if (!posts.length || !posts) {
@@ -13,11 +13,16 @@ export const getPosts = (_req: Request, res: Response, _next: NextFunction) => {
         });
       }
       return res.status(200).json({
+        message: 'Fetched Post Succesfully',
         posts,
       });
     })
     .catch((err) => {
       console.log('logging error finding post', err);
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
     });
 };
 
@@ -68,17 +73,21 @@ export const getSinglePost = (req: Request, res: Response, next: NextFunction) =
   Post.findById(postId)
     .then((post) => {
       if (!post) {
-        const error: HttpError = new Error('No Post Found');
-        error.statusCode = 500;
+        const error: HttpError = new Error('Could not find Post');
+        error.statusCode = 404;
         throw error;
       }
       res.status(200).json({
+        message: 'Post Fetched.',
         post,
       });
     })
     .catch((err) => {
-      const error: HttpError = new Error(err);
-      error.statusCode = 500;
-      next(error);
+      // const error: HttpError = new Error(err);
+      // error.statusCode = 500;
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
     });
 };

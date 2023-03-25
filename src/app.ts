@@ -8,11 +8,12 @@ import { HttpError } from './types';
 
 const MONGODB_URI = 'mongodb://localhost:27017/messages';
 const __dirname = path.resolve();
+console.log('dirname', __dirname);
 
 const app: Express = express();
 
 app.use(bodyParser.json());
-app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use('/images', express.static(path.join(__dirname, 'src', 'images')));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
