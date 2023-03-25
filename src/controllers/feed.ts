@@ -1,7 +1,12 @@
+import fs from 'fs';
+import path from 'path';
+
 import { Request, Response, NextFunction } from 'express';
 import { validationResult } from 'express-validator';
 import { Post } from '../models';
 import { HttpError } from '../types';
+
+const __dirname = path.resolve();
 
 export const getPosts = (_req: Request, res: Response, next: NextFunction) => {
   Post.find()
@@ -129,6 +134,10 @@ export const updatePost = (req: Request, res: Response, next: NextFunction) => {
         throw error;
       }
 
+      if (imageUrl !== post?.imageUrl) {
+        clearImage(post?.imageUrl);
+      }
+
       post.title = title;
       post.imageUrl = imageUrl;
       post.content = content;
@@ -148,4 +157,9 @@ export const updatePost = (req: Request, res: Response, next: NextFunction) => {
       console.log('Post Edit error', err);
       next(err);
     });
+};
+
+const clearImage = (filepath: string) => {
+  const filePath = path.join(__dirname, filepath);
+  fs.unlink(filePath, (err) => console.log('Clear image file error', err));
 };
