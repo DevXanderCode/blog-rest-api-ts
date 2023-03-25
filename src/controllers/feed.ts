@@ -27,6 +27,8 @@ export const getPosts = (_req: Request, res: Response, next: NextFunction) => {
 };
 
 export const createPost = (req: Request, res: Response, next: NextFunction) => {
+  console.log('Logging request for create post', req);
+
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -38,12 +40,21 @@ export const createPost = (req: Request, res: Response, next: NextFunction) => {
     //   errors: errors?.array(),
     // });
   }
+
+  if (!req?.file) {
+    const error: HttpError = new Error('No Image provided');
+    error.statusCode = 422;
+    throw error;
+  }
   const { title, content } = req.body;
+  const imageUrl = req?.file?.path;
+
+  console.log('Logging imageurl', imageUrl);
 
   const post = new Post({
     title,
     content,
-    imageUrl: 'images/person.jpg',
+    imageUrl,
     creator: {
       name: 'DevXanderCode',
     },

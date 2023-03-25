@@ -3,7 +3,8 @@ import path from 'path';
 import express, { Express, Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
-import multer from 'multer';
+import multer, { FileFilterCallback } from 'multer';
+import cors from 'cors';
 import { feedRoutes } from './routes';
 import { HttpError } from './types';
 
@@ -14,14 +15,14 @@ const app: Express = express();
 
 const fileStorage = multer.diskStorage({
   destination: (req: Request, file, cb) => {
-    cb(null, 'images');
+    cb(null, 'src/images');
   },
   filename: (req: Request, file, cb) => {
     cb(null, new Date().toISOString() + '-' + file.originalname);
   },
 });
 
-const fileFilter = (req: Request, file: Express.Multer.File, cb: (arg0: null, arg1: boolean) => void) => {
+const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
   if (file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg') {
     cb(null, true);
   } else {
@@ -29,10 +30,12 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: (arg0: null, ar
   }
 };
 
+app.use(cors());
 // app.use(bodyParser.urlencoded()); // x-www-form-url-encoded
 app.use(bodyParser.json());
 app.use(multer({ storage: fileStorage, fileFilter }).single('image'));
 app.use('/images', express.static(path.join(__dirname, 'src', 'images')));
+app.use('/src/images', express.static(path.join(__dirname, 'src', 'images')));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
