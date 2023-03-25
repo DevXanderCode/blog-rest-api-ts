@@ -159,6 +159,35 @@ export const updatePost = (req: Request, res: Response, next: NextFunction) => {
     });
 };
 
+export const deletePost = (req: Request, res: Response, next: NextFunction) => {
+  const postId = req.params?.postId;
+
+  Post.findById(postId)
+    .then((post) => {
+      if (!post) {
+        const error: HttpError = new Error('Could not find Post');
+        error.statusCode = 404;
+        throw error;
+      }
+      //TODO: check logged in user
+      clearImage(post?.imageUrl);
+      return Post.findByIdAndRemove(postId);
+    })
+    .then((result) => {
+      console.log('delete post result', result);
+      res.status(200).json({
+        message: 'Post deleted successfully',
+      });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      console.log('Post delete error', err);
+      next(err);
+    });
+};
+
 const clearImage = (filepath: string) => {
   const filePath = path.join(__dirname, filepath);
   fs.unlink(filePath, (err) => console.log('Clear image file error', err));
