@@ -8,8 +8,19 @@ import { HttpError } from '../types';
 
 const __dirname = path.resolve();
 
-export const getPosts = (_req: Request, res: Response, next: NextFunction) => {
+export const getPosts = (req: Request, res: Response, next: NextFunction) => {
+  const currentPage = Number(req.query?.page || 1);
+  const perPage = 2;
+  let totalItems: number;
+
   Post.find()
+    .countDocuments()
+    .then((count) => {
+      totalItems = count;
+      return Post.find()
+        .skip((currentPage - 1) * perPage)
+        .limit(perPage);
+    })
     .then((posts) => {
       if (!posts.length || !posts) {
         return res.status(200).json({
@@ -20,10 +31,10 @@ export const getPosts = (_req: Request, res: Response, next: NextFunction) => {
       return res.status(200).json({
         message: 'Fetched Post Succesfully',
         posts,
+        totalItems,
       });
     })
     .catch((err) => {
-      console.log('logging error finding post', err);
       if (!err.statusCode) {
         err.statusCode = 500;
       }

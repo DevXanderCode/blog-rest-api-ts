@@ -34,7 +34,7 @@ app.use(cors());
 // app.use(bodyParser.urlencoded()); // x-www-form-url-encoded
 app.use(bodyParser.json());
 app.use(multer({ storage: fileStorage, fileFilter }).single('image'));
-app.use('/images', express.static(path.join(__dirname, 'src', 'images')));
+// app.use('/images', express.static(path.join(__dirname, 'src', 'images')));
 app.use('/src/images', express.static(path.join(__dirname, 'src', 'images')));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
