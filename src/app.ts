@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import multer, { FileFilterCallback } from 'multer';
 import cors from 'cors';
-import { feedRoutes } from './routes';
+import { feedRoutes, authRoutes } from './routes';
 import { HttpError } from './types';
 
 const MONGODB_URI = 'mongodb://localhost:27017/messages';
@@ -45,10 +45,11 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use('/feed', feedRoutes);
+app.use('/auth', authRoutes);
 
 app.use((error: HttpError, req: Request, res: Response, next: NextFunction) => {
-  const { statusCode: status, message } = error;
-  res.status(status || 500).json({ message });
+  const { statusCode: status, message, data } = error;
+  res.status(status || 500).json({ message, data });
 });
 
 mongoose
