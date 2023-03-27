@@ -1,12 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import { validationResult } from 'express-validator';
 import bcrypt from 'bcryptjs';
-import { sign } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { Document } from 'mongoose';
 import { HttpError } from '../types';
 import { User } from '../models';
 
 const { hash, compare } = bcrypt;
+const { sign } = jwt;
 
 interface SavedUser extends Document {
   email: string;
