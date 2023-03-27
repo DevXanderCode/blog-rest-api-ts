@@ -1,10 +1,19 @@
 import { Request, Response, NextFunction } from 'express';
 import { validationResult } from 'express-validator';
 import bcrypt from 'bcryptjs';
+import { sign } from 'jsonwebtoken';
+import { Document } from 'mongoose';
 import { HttpError } from '../types';
 import { User } from '../models';
 
 const { hash, compare } = bcrypt;
+
+interface SavedUser extends Document {
+  email: string;
+  password: string;
+  name: string;
+  status: string;
+}
 
 export const signup = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
@@ -40,7 +49,7 @@ export const signup = (req: Request, res: Response, next: NextFunction) => {
 };
 export const login = (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
-  let loadedUser;
+  let loadedUser: SavedUser;
 
   User.findOne({ email })
     .then((user) => {
@@ -59,6 +68,17 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
         error.statusCode = 401;
         throw error;
       }
+
+      const token = sign(
+        {
+          email: loadedUser?.email,
+          userId: loadedUser?._id?.toString(),
+        },
+        'SomeSuperSecretKey',
+        { expiresIn: '1h' },
+      );
+
+      res.status(200).json({ message: 'Login Succesful', token, userId: loadedUser?._id?.toString() });
     })
     .catch((err) => {
       if (!err.statusCode) {
