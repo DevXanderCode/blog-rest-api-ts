@@ -9,12 +9,17 @@ const router = Router();
 will call the getPosts function. */
 router.get('/posts', isAuth, getPosts);
 
-router.get('/post/:postId', getSinglePost);
+router.get('/post/:postId', isAuth, getSinglePost);
 
-router.post('/post', [body('title').isLength({ min: 5 }), body('content').isLength({ min: 5 })], createPost);
+router.post('/post', isAuth, [body('title').isLength({ min: 5 }), body('content').isLength({ min: 5 })], createPost);
 
-router.put('/post/:postId', [body('title').isLength({ min: 5 }), body('content').isLength({ min: 5 })], updatePost);
+router.put(
+  '/post/:postId',
+  isAuth,
+  [body('title').isLength({ min: 5 }), body('content').isLength({ min: 5 })],
+  updatePost,
+);
 
-router.delete('/post/:postId', deletePost);
+router.delete('/post/:postId', isAuth, deletePost);
 
 export default router;

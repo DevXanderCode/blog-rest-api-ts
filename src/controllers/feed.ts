@@ -3,10 +3,18 @@ import path from 'path';
 
 import { Request, Response, NextFunction } from 'express';
 import { validationResult } from 'express-validator';
-import { Post } from '../models';
+import { Post, User } from '../models';
 import { HttpError } from '../types';
+import { Document } from 'mongoose';
 
 const __dirname = path.resolve();
+
+interface UserDoc extends Document {
+  _id: string;
+  name: string;
+  email: string;
+  posts: string[];
+}
 
 export const getPosts = (req: Request, res: Response, next: NextFunction) => {
   const currentPage = Number(req.query?.page || 1);
@@ -62,23 +70,31 @@ export const createPost = (req: Request, res: Response, next: NextFunction) => {
   }
   const { title, content } = req.body;
   const imageUrl = req?.file?.path;
+  let creator: UserDoc;
 
   const post = new Post({
     title,
     content,
     imageUrl,
-    creator: {
-      name: 'DevXanderCode',
-    },
+    creator: req?.userId,
   });
 
   post
     .save()
     .then((result) => {
-      console.log('post save result', result);
+      console.log('Logging saved post', result);
+      return User.findById(req?.userId);
+    })
+    .then((user) => {
+      creator = user as unknown as UserDoc;
+      user?.posts?.push(post?._id);
+      return user?.save();
+    })
+    .then((result) => {
       res.status(201).json({
         message: 'Post created Successfully!',
-        post: result,
+        post,
+        creator: { _id: creator?._id, name: creator?.name },
       });
     })
     .catch((err) => {

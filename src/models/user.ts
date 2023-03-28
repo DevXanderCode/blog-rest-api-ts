@@ -17,7 +17,7 @@ const userSchema = new Schema({
     type: String,
     default: 'I am New!',
   },
-  post: [
+  posts: [
     {
       type: Schema.Types.ObjectId,
       ref: 'Post',
