@@ -1,4 +1,14 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
+
+// interface PostInterface {
+//   type: Schema.Types.ObjectId;
+//   ref: 'Post';
+// }
+
+const miniPostSchema = new Schema({
+  type: Schema.Types.ObjectId,
+  ref: 'Post',
+});
 
 const userSchema = new Schema({
   email: {
@@ -17,12 +27,14 @@ const userSchema = new Schema({
     type: String,
     default: 'I am New!',
   },
-  posts: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Post',
-    },
-  ],
+  //   posts: [
+  //     {
+  //       type: Schema.Types.ObjectId,
+  //       ref: 'Post',
+  //     },
+  //   ],
+  // posts: Types.DocumentArray<PostInterface>,
+  posts: [miniPostSchema],
 });
 
 export default model('User', userSchema);
