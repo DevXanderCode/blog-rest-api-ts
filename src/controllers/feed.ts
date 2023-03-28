@@ -222,7 +222,10 @@ export const deletePost = (req: Request, res: Response, next: NextFunction) => {
         error.statusCode = 500;
         throw error;
       }
-      user.posts?.pull(postId);
+      // user.posts?.pull(postId);
+      const newUserPost = user?.posts?.filter((pId) => pId.toString() !== postId.toString());
+      console.log('new user post', newUserPost);
+      user.posts = newUserPost;
       return user.save();
     })
     .then((result) => {
