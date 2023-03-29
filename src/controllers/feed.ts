@@ -225,6 +225,8 @@ export const deletePost = async (req: Request, res: Response, next: NextFunction
     user.posts = newUserPost;
     await user.save();
 
+    getIO().emit('posts', { action: 'delete', post: postId });
+
     res.status(200).json({
       message: 'Post deleted successfully',
     });
