@@ -26,6 +26,7 @@ export const getPosts = async (req: Request, res: Response, next: NextFunction) 
 
     const posts = await Post.find()
       .populate('creator')
+      .sort({ createdAt: -1 })
       .skip((currentPage - 1) * perPage)
       .limit(perPage);
 
@@ -160,7 +161,7 @@ export const updatePost = async (req: Request, res: Response, next: NextFunction
       error.statusCode = 404;
       throw error;
     }
-    if (post?.creator?.toString() !== req?.userId) {
+    if (post?.creator?._id?.toString() !== req?.userId) {
       const error: HttpError = new Error('Not Authorized.');
       error.statusCode = 403;
       throw error;

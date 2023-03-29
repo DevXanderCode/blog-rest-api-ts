@@ -9,7 +9,10 @@ interface PostSchemaInterface extends DocumentResult<PostSchemaInterface> {
   title: string;
   imageUrl: string;
   content: string;
-  creator: string;
+  creator: {
+    _id: string;
+    name: string;
+  };
 }
 
 const postSchema = new Schema(
