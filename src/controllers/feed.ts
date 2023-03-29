@@ -154,7 +154,7 @@ export const updatePost = async (req: Request, res: Response, next: NextFunction
   }
 
   try {
-    const post = await Post.findById(postId);
+    const post = await Post.findById(postId).populate('creator');
     if (!post) {
       const error: HttpError = new Error('Could not find Post');
       error.statusCode = 404;
@@ -175,6 +175,8 @@ export const updatePost = async (req: Request, res: Response, next: NextFunction
     post.content = content;
 
     const savedPost = await post.save();
+
+    getIO().emit('posts', { action: 'update', post: savedPost });
 
     res.status(200).json({
       message: 'Post Updated successfully',
