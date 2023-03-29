@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import multer, { FileFilterCallback } from 'multer';
 import cors from 'cors';
 import { feedRoutes, authRoutes } from './routes';
+import { init } from './socket';
 import { HttpError } from './types';
 
 const MONGODB_URI = 'mongodb://localhost:27017/messages';
@@ -57,8 +58,13 @@ mongoose
   .then((result) => {
     console.log('Database connected');
 
-    app.listen(8080, () => {
+    const server = app.listen(8080, () => {
       console.log('app listening at port 8080');
+    });
+    const io = init(server);
+
+    io.on('connection', (socket) => {
+      console.log('Client connected.');
     });
   })
   .catch((err) => {

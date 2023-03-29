@@ -5,7 +5,8 @@ import { Request, Response, NextFunction } from 'express';
 import { validationResult } from 'express-validator';
 import { Post, User } from '../models';
 import { HttpError } from '../types';
-import { AnyArray, Document } from 'mongoose';
+import { Document } from 'mongoose';
+import { getIO } from '../socket';
 
 const __dirname = path.resolve();
 
@@ -83,6 +84,8 @@ export const createPost = async (req: Request, res: Response, next: NextFunction
     creator = user as unknown as UserDoc;
     user?.posts?.push(post?._id);
     await user?.save();
+
+    getIO().emit('posts', { action: 'create', post });
 
     res.status(201).json({
       message: 'Post created Successfully!',
