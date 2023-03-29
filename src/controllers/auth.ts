@@ -16,7 +16,7 @@ interface SavedUser extends Document {
   status: string;
 }
 
-export const signup = (req: Request, res: Response, next: NextFunction) => {
+export const signup = async (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -28,63 +28,60 @@ export const signup = (req: Request, res: Response, next: NextFunction) => {
 
   const { email, password, name } = req.body;
 
-  hash(password, 12)
-    .then((hashedPassword) => {
-      const user = new User({
-        email,
-        name,
-        password: hashedPassword,
-      });
+  try {
+    const hashedPassword = await hash(password, 12);
 
-      return user.save();
-    })
-    .then((result) => {
-      res.status(201).json({ message: 'User created successfully.', userId: result?._id });
-    })
-    .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      next(err);
+    const user = new User({
+      email,
+      name,
+      password: hashedPassword,
     });
+
+    const savedUser = await user.save();
+
+    res.status(201).json({ message: 'User created successfully.', userId: savedUser?._id });
+  } catch (err: any) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
 };
-export const login = (req: Request, res: Response, next: NextFunction) => {
+
+export const login = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
   let loadedUser: SavedUser;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      const error: HttpError = new Error(`A user with ${email} email address could not be found.`);
+      error.statusCode = 401;
+      throw error;
+    }
 
-  User.findOne({ email })
-    .then((user) => {
-      if (!user) {
-        const error: HttpError = new Error(`A user with ${email} email address could not be found.`);
-        error.statusCode = 401;
-        throw error;
-      }
+    loadedUser = user;
+    const isEqual = await compare(password, user?.password);
 
-      loadedUser = user;
-      return compare(password, user?.password);
-    })
-    .then((isEqual) => {
-      if (!isEqual) {
-        const error: HttpError = new Error('Incorrect password.');
-        error.statusCode = 401;
-        throw error;
-      }
+    if (!isEqual) {
+      const error: HttpError = new Error('Incorrect password.');
+      error.statusCode = 401;
+      throw error;
+    }
 
-      const token = sign(
-        {
-          email: loadedUser?.email,
-          userId: loadedUser?._id?.toString(),
-        },
-        'SomeSuperSecretKey',
-        { expiresIn: '1h' },
-      );
+    const token = sign(
+      {
+        email: loadedUser?.email,
+        userId: loadedUser?._id?.toString(),
+      },
+      'SomeSuperSecretKey',
+      { expiresIn: '1h' },
+    );
 
-      res.status(200).json({ message: 'Login Succesful', token, userId: loadedUser?._id?.toString() });
-    })
-    .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      next(err);
-    });
+    res.status(200).json({ message: 'Login Succesful', token, userId: loadedUser?._id?.toString() });
+  } catch (err: any) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
 };
