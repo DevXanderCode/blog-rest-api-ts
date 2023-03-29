@@ -1,5 +1,17 @@
 import { Schema, model } from 'mongoose';
 
+interface DocumentResult<T> {
+  _doc: T;
+}
+
+interface PostSchemaInterface extends DocumentResult<PostSchemaInterface> {
+  _id: any;
+  title: string;
+  imageUrl: string;
+  content: string;
+  creator: string;
+}
+
 const postSchema = new Schema(
   {
     title: {
@@ -23,4 +35,4 @@ const postSchema = new Schema(
   { timestamps: true },
 );
 
-export default model('Post', postSchema);
+export default model<PostSchemaInterface>('Post', postSchema);
