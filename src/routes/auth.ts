@@ -27,4 +27,6 @@ router.put(
 
 router.post('/login', login);
 
+router.get('/status', getUserStatus);
+
 export default router;

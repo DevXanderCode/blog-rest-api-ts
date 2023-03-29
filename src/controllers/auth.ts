@@ -85,3 +85,20 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     next(err);
   }
 };
+
+export const getUserStatus = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      const error: HttpError = new Error('User not found.');
+      error.statusCode = 404;
+      throw error;
+    }
+    res.status(200).json({ status: user.status });
+  } catch (err: any) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
