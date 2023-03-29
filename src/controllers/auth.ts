@@ -89,6 +89,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 export const getUserStatus = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = await User.findById(req.userId);
+    console.log('Logging status user', user, req?.userId);
     if (!user) {
       const error: HttpError = new Error('User not found.');
       error.statusCode = 404;
