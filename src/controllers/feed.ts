@@ -5,7 +5,8 @@ import { Request, Response, NextFunction } from 'express';
 import { validationResult } from 'express-validator';
 import { Post, User } from '../models';
 import { HttpError } from '../types';
-import { AnyArray, Document } from 'mongoose';
+import { Document } from 'mongoose';
+import { getIO } from '../socket';
 
 const __dirname = path.resolve();
 
@@ -24,6 +25,8 @@ export const getPosts = async (req: Request, res: Response, next: NextFunction) 
     const totalItems = await Post.find().countDocuments();
 
     const posts = await Post.find()
+      .populate('creator')
+      .sort({ createdAt: -1 })
       .skip((currentPage - 1) * perPage)
       .limit(perPage);
 
@@ -83,6 +86,12 @@ export const createPost = async (req: Request, res: Response, next: NextFunction
     creator = user as unknown as UserDoc;
     user?.posts?.push(post?._id);
     await user?.save();
+
+    getIO().emit('posts', {
+      action: 'create',
+      post: { ...post?._doc, creator: { _id: req?.userId, name: user?.name } },
+    });
+    // getIO().emit('posts', { action: 'create', post: { ...post } });
 
     res.status(201).json({
       message: 'Post created Successfully!',
@@ -146,13 +155,13 @@ export const updatePost = async (req: Request, res: Response, next: NextFunction
   }
 
   try {
-    const post = await Post.findById(postId);
+    const post = await Post.findById(postId).populate('creator');
     if (!post) {
       const error: HttpError = new Error('Could not find Post');
       error.statusCode = 404;
       throw error;
     }
-    if (post?.creator?.toString() !== req?.userId) {
+    if (post?.creator?._id?.toString() !== req?.userId) {
       const error: HttpError = new Error('Not Authorized.');
       error.statusCode = 403;
       throw error;
@@ -167,6 +176,8 @@ export const updatePost = async (req: Request, res: Response, next: NextFunction
     post.content = content;
 
     const savedPost = await post.save();
+
+    getIO().emit('posts', { action: 'update', post: savedPost });
 
     res.status(200).json({
       message: 'Post Updated successfully',
@@ -213,6 +224,8 @@ export const deletePost = async (req: Request, res: Response, next: NextFunction
     const newUserPost = user?.posts?.filter((pId) => pId.toString() !== postId.toString());
     user.posts = newUserPost;
     await user.save();
+
+    getIO().emit('posts', { action: 'delete', post: postId });
 
     res.status(200).json({
       message: 'Post deleted successfully',
