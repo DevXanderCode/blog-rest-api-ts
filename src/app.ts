@@ -5,9 +5,11 @@ import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import multer, { FileFilterCallback } from 'multer';
 import cors from 'cors';
-import { feedRoutes, authRoutes } from './routes';
-import { init } from './socket';
+import { graphqlHTTP } from 'express-graphql';
+// import { feedRoutes, authRoutes } from './routes';
 import { HttpError } from './types';
+import graphqlSchema from './graphql/schemas';
+import graphqlResolver from './graphql/resolvers';
 
 const MONGODB_URI = 'mongodb://localhost:27017/messages';
 const __dirname = path.resolve();
@@ -45,8 +47,16 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-app.use('/feed', feedRoutes);
-app.use('/auth', authRoutes);
+// app.use('/feed', feedRoutes);
+// app.use('/auth', authRoutes);
+
+app.use(
+  '/graphql',
+  graphqlHTTP({
+    schema: graphqlSchema,
+    rootValue: graphqlResolver,
+  }),
+);
 
 app.use((error: HttpError, req: Request, res: Response, next: NextFunction) => {
   const { statusCode: status, message, data } = error;
@@ -58,13 +68,8 @@ mongoose
   .then((result) => {
     console.log('Database connected');
 
-    const server = app.listen(8080, () => {
+    app.listen(8080, () => {
       console.log('app listening at port 8080');
-    });
-    const io = init(server);
-
-    io.on('connection', (socket) => {
-      console.log('Client connected.');
     });
   })
   .catch((err) => {
