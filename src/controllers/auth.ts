@@ -2,19 +2,11 @@ import { Request, Response, NextFunction } from 'express';
 import { validationResult } from 'express-validator';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { Document } from 'mongoose';
-import { HttpError } from '../types';
+import { HttpError, SavedUser } from '../types';
 import { User } from '../models';
 
 const { hash, compare } = bcrypt;
 const { sign } = jwt;
-
-interface SavedUser extends Document {
-  email: string;
-  password: string;
-  name: string;
-  status: string;
-}
 
 export const signup = async (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
@@ -50,7 +42,7 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
-  let loadedUser: SavedUser;
+  let loadedUser;
   try {
     const user = await User.findOne({ email });
     if (!user) {

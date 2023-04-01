@@ -4,7 +4,7 @@ interface DocumentResult<T> {
   _doc: T;
 }
 
-interface PostSchemaInterface extends DocumentResult<PostSchemaInterface> {
+export interface PostSchemaInterface extends DocumentResult<PostSchemaInterface> {
   _id: any;
   title: string;
   imageUrl: string;
@@ -18,7 +18,6 @@ interface PostSchemaInterface extends DocumentResult<PostSchemaInterface> {
 const postSchema = new Schema(
   {
     title: {
-      type: String,
       required: true,
     },
     imageUrl: {

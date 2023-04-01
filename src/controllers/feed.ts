@@ -6,7 +6,7 @@ import { validationResult } from 'express-validator';
 import { Post, User } from '../models';
 import { HttpError } from '../types';
 import { Document } from 'mongoose';
-import { getIO } from '../socket';
+// import { getIO } from '../socket';
 
 const __dirname = path.resolve();
 
@@ -87,10 +87,10 @@ export const createPost = async (req: Request, res: Response, next: NextFunction
     user?.posts?.push(post?._id);
     await user?.save();
 
-    getIO().emit('posts', {
-      action: 'create',
-      post: { ...post?._doc, creator: { _id: req?.userId, name: user?.name } },
-    });
+    // getIO().emit('posts', {
+    //   action: 'create',
+    //   post: { ...post?._doc, creator: { _id: req?.userId, name: user?.name } },
+    // });
     // getIO().emit('posts', { action: 'create', post: { ...post } });
 
     res.status(201).json({
@@ -177,7 +177,7 @@ export const updatePost = async (req: Request, res: Response, next: NextFunction
 
     const savedPost = await post.save();
 
-    getIO().emit('posts', { action: 'update', post: savedPost });
+    // getIO().emit('posts', { action: 'update', post: savedPost });
 
     res.status(200).json({
       message: 'Post Updated successfully',
@@ -225,7 +225,7 @@ export const deletePost = async (req: Request, res: Response, next: NextFunction
     user.posts = newUserPost;
     await user.save();
 
-    getIO().emit('posts', { action: 'delete', post: postId });
+    // getIO().emit('posts', { action: 'delete', post: postId });
 
     res.status(200).json({
       message: 'Post deleted successfully',
