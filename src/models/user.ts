@@ -45,6 +45,7 @@ const userSchema = new Schema({
     {
       type: Schema.Types.ObjectId,
       ref: 'Post',
+      required: true,
     },
   ],
   // posts: Types.DocumentArray<PostInterface>,

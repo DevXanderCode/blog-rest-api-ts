@@ -18,6 +18,7 @@ export interface PostSchemaInterface extends DocumentResult<PostSchemaInterface>
 const postSchema = new Schema(
   {
     title: {
+      type: String,
       required: true,
     },
     imageUrl: {

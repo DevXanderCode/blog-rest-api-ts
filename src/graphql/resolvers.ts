@@ -28,7 +28,7 @@ const root = {
 
     return {
       ...savedUser?._doc,
-      _id: savedUser?._id,
+      _id: savedUser?._id?.toString(),
     };
   },
 };
