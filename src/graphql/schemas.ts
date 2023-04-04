@@ -1,4 +1,3 @@
-import { query } from 'express';
 import { buildSchema } from 'graphql';
 
 const schema = buildSchema(`
@@ -35,10 +34,10 @@ const schema = buildSchema(`
         createUser(userInput: UserInputData): User!
     }
 
-        schema {
-            query: RootQuery
-            mutation: RootMutation
-        }
+    schema {
+        query: RootQuery
+        mutation: RootMutation
+    }
 `);
 
 export default schema;
