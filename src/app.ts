@@ -7,9 +7,10 @@ import multer, { FileFilterCallback } from 'multer';
 import cors from 'cors';
 import { graphqlHTTP } from 'express-graphql';
 // import { feedRoutes, authRoutes } from './routes';
-import { HttpError } from './types';
+import { HttpError, CustomGraphqlError } from './types';
 import graphqlSchema from './graphql/schemas';
 import graphqlResolver from './graphql/resolvers';
+import { GraphQLError } from 'graphql';
 
 const MONGODB_URI = 'mongodb://localhost:27017/messages';
 const __dirname = path.resolve();
@@ -50,19 +51,28 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // app.use('/feed', feedRoutes);
 // app.use('/auth', authRoutes);
 
-app.use(
-  '/graphql',
+app.use('/graphql', cors(), (req, res) =>
   graphqlHTTP({
     schema: graphqlSchema,
     rootValue: graphqlResolver,
     graphiql: true,
-  }),
+    customFormatErrorFn(error: any) {
+      if (!error?.originalError) {
+        return error;
+      }
+      const data = error?.extensions?.data;
+      const message = error?.message || 'An Error Occured.';
+      const code = error?.extensions?.code || 500;
+
+      return { message, status: code, data };
+    },
+  })(req, res),
 );
 
-app.use((error: HttpError, req: Request, res: Response, next: NextFunction) => {
-  const { statusCode: status, message, data } = error;
-  res.status(status || 500).json({ message, data });
-});
+// app.use((error: HttpError, req: Request, res: Response, next: NextFunction) => {
+//   const { statusCode: status, message, data } = error;
+//   res.status(status || 500).json({ message, data });
+// });
 
 mongoose
   .connect(MONGODB_URI)

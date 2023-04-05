@@ -3,8 +3,18 @@ import bcrypt from 'bcryptjs';
 import validator from 'validator';
 import { User } from '../models';
 import { HttpError } from '../types';
+import { GraphQLError } from 'graphql';
 
 const { hash, compare } = bcrypt;
+
+class MyGraphQLError extends GraphQLError {
+  constructor(message: string, code: number, data?: { message: string }[]) {
+    super(message, undefined, undefined, undefined, undefined, undefined, {
+      code,
+      ...(data && { data }),
+    });
+  }
+}
 
 const root = {
   createUser: async (args: { userInput: { email: any; password: any; name: any } }, req: Request) => {
@@ -21,9 +31,14 @@ const root = {
     }
 
     if (errors.length > 0) {
-      const error = new Error('Invalid Input');
+      // const error: HttpError = new Error(errors?.map((e) => e?.message).join(', '));
+      const error = new MyGraphQLError(errors?.map((e) => e?.message).join(', '), 422, errors);
+      // error.data = errors;
+      // error.code = 422;
+      // console.log('Some error throw', error);
       throw error;
     }
+
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
