@@ -4,7 +4,7 @@ interface DocumentResult<T> {
   _doc: T;
 }
 
-interface PostSchemaInterface extends DocumentResult<PostSchemaInterface> {
+export interface PostSchemaInterface extends DocumentResult<PostSchemaInterface> {
   _id: any;
   title: string;
   imageUrl: string;
