@@ -1,11 +1,13 @@
 import { Request } from 'express';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import validator from 'validator';
 import { User } from '../models';
 import { HttpError } from '../types';
 import { GraphQLError } from 'graphql';
 
 const { hash, compare } = bcrypt;
+const { sign } = jwt;
 
 class MyGraphQLError extends GraphQLError {
   constructor(message: string, code: number, data?: { message: string }[]) {
@@ -31,19 +33,15 @@ const root = {
     }
 
     if (errors.length > 0) {
-      // const error: HttpError = new Error(errors?.map((e) => e?.message).join(', '));
       const error = new MyGraphQLError(errors?.map((e) => e?.message).join(', '), 422, errors);
-      // error.data = errors;
-      // error.code = 422;
-      // console.log('Some error throw', error);
       throw error;
     }
 
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      const error: HttpError = new Error('User exists already.');
-      error.statusCode = 403;
+      const error = new MyGraphQLError('User exists already', 403);
+
       throw error;
     }
 
@@ -60,6 +58,36 @@ const root = {
     return {
       ...savedUser?._doc,
       _id: savedUser?._id?.toString(),
+    };
+  },
+
+  login: async function ({ email, password }: { email: string; password: string }) {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      const error = new MyGraphQLError('User not Found', 404);
+      throw error;
+    }
+
+    const isEqual = await compare(password, user?.password);
+
+    if (!isEqual) {
+      const error = new MyGraphQLError('Password is Incorrect', 401);
+      throw error;
+    }
+
+    const token = sign(
+      {
+        email: user?.email,
+        userId: user?._id?.toString(),
+      },
+      'SomeSuperSecretKey',
+      { expiresIn: '1h' },
+    );
+
+    return {
+      token,
+      userId: user?._id?.toString(),
     };
   },
 };
