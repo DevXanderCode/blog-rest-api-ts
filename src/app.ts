@@ -57,6 +57,7 @@ app.use('/graphql', cors(), (req, res) =>
     rootValue: graphqlResolver,
     graphiql: true,
     customFormatErrorFn(error: any) {
+      console.log('app error', error?.originalError);
       if (!error?.originalError) {
         return error;
       }
